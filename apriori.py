@@ -17,6 +17,7 @@ class Apriori(object):
         self.fp_itemsets = []
         # current candidates 
         self.cur_candidates = []
+        self.cur_flag_list = []
         
     def run(self):
         # generate 1-itemset frequent pattern
@@ -26,7 +27,7 @@ class Apriori(object):
         while True:
             k += 1
             self._gen_candidates(k)
-            self._prune_by_apriori_property()
+            self._prune_by_apriori_property(k)
             self._prune_by_support()
             
         return ...
@@ -45,10 +46,38 @@ class Apriori(object):
                    item1[k-1] < item2[k-1]:
                     self.cur_candidates.append(item1[:k-1] + item2[k-1])
                     
-    def _prune_by_apriori_property(self):
-        for candidate in self.cur_candidates:
-            
-            
+        # 标识这个candidate是否要去除
+        self.cur_flag_list = [True for i in xrange(len(self.cur_candidates))] 
+                    
+    def _prune_by_apriori_property(self, k):
+        cur_len = len(self.cur_candidates[0])
+        # traverse candidate of this iteration
+        for idx,candidate in enumerate(self.cur_candidates):
+            # get all subsets of this candidate
+            for i in xrange(cur_len):
+                subset = [candidate[j] for j in xrange(cur_len) if j != i]
+                if not self._is_match_apriori_property(k, subset):
+                    self.cur_flag_list[idx] = False
+                    break
+                
+    def _prune_by_support(self):
+        # traverse candidate of this iteration
+        for idx, candidate in enumerate(self.cur_candidates):
+            # only consider current avaliable candidate
+            if self.cur_flag_list[idx]:
+                support = self._compute_support(candidate)
+        # get count
+        
+    def _compute_support(self, candidate):
+        for 
+                
+    def _is_match_apriori_property(self, k, subset):
+        pre_fp_itemset = self.fp_itemsets[k-1]
+        for item in pre_fp_itemset:
+            if cmp(item, subset) == 0:
+                return True
+                
+        return False
     
     def _gen_one_itemset_fp(self):
         one_candidates = {}
