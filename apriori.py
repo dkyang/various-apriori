@@ -18,7 +18,7 @@ class Apriori(object):
         
         # frequent patterns
         # record each iteration, idx = k means iteration (k-1)'s result
-        self.fp_itemsets = []
+        self.fp_itemsets_list = []
         self.fp_support_list = []
         
         # current candidates 
@@ -51,23 +51,66 @@ class Apriori(object):
             if len(cur_fp_itemsets) == 0:
                 break
             
-            self.fp_itemsets.append(cur_fp_itemsets) 
+            self.fp_itemsets_list.append(cur_fp_itemsets) 
             self.fp_support_list.append(cur_fp_support)
     
     def generate_association_rules(self):    
-        for 
+        res_fp_itemsets = self.fp_itemsets_list[-1]
+        for itemset in res_fp_itemsets:
+            subsets = self._get_all_subsets(itemset)
+            for subset in subsets:
+                if len(subset) == 0 or len(subset) == len(itemset):
+                    continue
+            diffset = self._get_diff_set(subset, itemset)
+            
+            subset_support = self._get_itemset_support(subset)
+            diffset_support = self._get_itemset_support(diff)
+            
+            if subset_support / float(diffset_support) >= self.min_confidence:
+                print str(subset) + " ====> " + str(diffset)
+            
+            
+    def _get_itemset_support(self, s):
+        # get corresponding itemsets according to length of the set 
+        length = len(s)
+        fp_itemsets = self.fp_itemsets_list[length - 1]
+        for idx,itemset in enumerate(fp_itemsets):
+            if cmp(s, itemset) == 0:
+                return idx
+        
+        raise ValueError("subset " + str(s) + " doesn't match apriori property")
+        
+    # assume both sub and ori are sorted
+    def _get_diff_set(self, sub, ori):
+        i = 0
+        j = 0
+        len_sub = len(sub)
+        len_ori = len(ori)
+        diff_set = []
+        while i < len_sub and j < len_ori:
+            if sub[i] == ori[j]:
+                i += 1
+                j += 1
+            else:
+                diff_set.append(ori[j])
+                j += 1
+        while j < len_ori:
+            diff_set.append(ori[j])
+            j += 1
+                
+        return diff_set
         
     # now type of collection is list
-    def _get_all_subsets(collection):
-        length = len(collection)
-        for i in xrange(length):
-            cur_collection = [collection[k] for k in xrange(length) if k != i]
-            print cur_collection
-            _get_all_subsets(cur_collection)
+    def _get_all_subsets(self, collection):
+        result = [[]]
+        for c in collection:
+            result += [r + [c] for r in result]
+        
+        return result
     
     def _gen_candidates(self, k):
         self.cur_candidates = []
-        pre_itemset = self.fp_itemsets[k-1]
+        pre_itemset = self.fp_itemsets_list[k-1]
         # self join operation
         # assume fp itemset are sorted
         for idx1, item1 in enumerate(pre_itemset):
@@ -124,7 +167,7 @@ class Apriori(object):
         return support
                 
     def _is_match_apriori_property(self, k, subset):
-        pre_fp_itemset = self.fp_itemsets[k-1]
+        pre_fp_itemset = self.fp_itemsets_list[k-1]
         for item in pre_fp_itemset:
             if cmp(item, subset) == 0:
                 return True
@@ -146,5 +189,5 @@ class Apriori(object):
             if value / float(self.num_trans) >= self.min_support:
                 trans = [key]
                 one_itemset.append(trans)
-        self.fp_itemsets.append(one_itemset)        
+        self.fp_itemsets_list.append(one_itemset)        
         
