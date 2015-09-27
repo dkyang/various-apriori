@@ -37,19 +37,30 @@ def compute_support(candidate, data):
         return support
 
 def _get_all_subsets(collection):
-    length = len(collection)
+    result = [[]]
+    for c in collection:
+        result += [r + [c] for r in result]
     
-    if length == 0:
-        return
+    return result
     
-    if length == 1:
-        print collection
-        return 
-    
-    for i in xrange(length):
-        cur_collection = [collection[k] for k in xrange(length) if k != i]
-        print cur_collection
-        _get_all_subsets(cur_collection)
+def _get_diff_set(sub, ori):
+    i = 0
+    j = 0
+    len_sub = len(sub)
+    len_ori = len(ori)
+    diff_set = []
+    while i < len_sub and j < len_ori:
+        if sub[i] == ori[j]:
+            i += 1
+            j += 1
+        else:
+            diff_set.append(ori[j])
+            j += 1
+    while j < len_ori:
+        diff_set.append(ori[j])
+        j += 1
+            
+    return diff_set
         
 # test 1       
 # test_subset([9, 5, 1, 0, 3])
@@ -80,4 +91,23 @@ print compute_support(candidate, [[0,1,3,5]]) # 4
 print compute_support(candidate, [[7]]) # 4
 '''
 # test 4
-_get_all_subsets([1, 2, 4, 6, 9])
+'''
+print _get_all_subsets([1, 2, 3])
+print _get_all_subsets([1])
+print _get_all_subsets([])
+print _get_all_subsets([1, 2, 3, 4, 5])
+'''
+
+# test 5
+'''
+print _get_diff_set([2,3], [2, 3, 4])
+print _get_diff_set([2], [2, 3, 4])
+print _get_diff_set([3,4], [2, 3, 4])
+print _get_diff_set([2, 3, 4], [2, 3, 4])
+'''
+
+# test 6
+print cmp([1,2], [1,2,3])
+print cmp([1,2,3], [1,2,3])
+print cmp([2,3], [1,2,3])
+print cmp([1,2,3,4], [1,2,3])
